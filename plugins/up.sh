@@ -62,13 +62,6 @@ Up::Execute()
     if [ "$optXdebug" = true ]; then
         export XDEBUG_ENABLED=true
     fi
-    if [ ! -z "${SYMFONY_PORT:-}" ]; then
-        if [ "$optXdebug" = true ]; then
-            Up::SymfonyXdebugOn
-        else
-            Up::SymfonyXdebugOff
-        fi
-    fi
 
     Compose::InitDockerCompose
 
@@ -89,21 +82,6 @@ Up::Execute()
    # create file bash_home/.bash_history if it doesn't exists
    touch "${JETDOCKER}/bash_home/.bash_history"
    touch "${JETDOCKER}/bash_home/.my_aliases"
-
-   if [ ! -z "${SYMFONY_PORT:-}" ]; then
-       # For symfony < 4 bootstrap app.php or app_dev.php depending on SYMFONY_ENV var
-       # For magento and symfony >=4 index.php bootstrap by default
-       export passthru=''
-       if [ -f "../${SYMFONY_PUBLIC_DIR}/app.php" ]; then
-        if [ ${SYMFONY_ENV} = 'prod' ]; then
-            passthru="--passthru=app.php"
-        else
-            passthru="--passthru=app_dev.php"
-        fi
-       fi
-       ${DEBUG} && echo "symfony server:start --no-tls --port=${SYMFONY_PORT} --dir=../ --document-root=../${SYMFONY_PUBLIC_DIR} --daemon ${passthru}"
-       symfony server:start --no-tls --port=${SYMFONY_PORT} --dir=../ --document-root=${SYMFONY_PUBLIC_DIR} --daemon ${passthru}
-   fi
 
    ${DEBUG} && docker-compose ${dockerComposeFile} config
    echo "$(UI.Color.Green)docker-compose ${dockerComposeFile} up -d ${JETDOCKER_UP_DEFAULT_SERVICE}$(UI.Color.Default)"
@@ -142,9 +120,6 @@ Up::Execute()
     if [ "$optSilent" = false ]; then
         # log in standard output
         try {
-            if [ ! -z "${SYMFONY_PORT:-}" ]; then
-               symfony server:log --dir=../${SYMFONY_PUBLIC_DIR} &
-            fi
             docker-compose logs --follow
         } catch {
             Log "End docker-compose logs --follow"
@@ -347,9 +322,6 @@ EOM
 Up::Stop()
 {
     try {
-       if [ ! -z "${SYMFONY_PORT:-}" ]; then
-          symfony server:stop --dir=../
-       fi
        docker-compose stop
        docker-compose rm -f -v
        docker network disconnect --force ${COMPOSE_PROJECT_NAME}_default nginx-reverse-proxy
@@ -365,17 +337,4 @@ Up::Message()
     echo ""
     echo "$(UI.Color.Green)Open your browser on $OPEN_URL $(UI.Color.Default)"
     echo ""
-}
-
-Up::SymfonyXdebugOn() {
-  Log "Up::SymfonyXdebugOn"
-  PHP_VERSION=$(symfony php -r "echo preg_replace('/(\.\d+)$/','', phpversion());")
-  sed -i'.original' -e 's/^;zend_extension/zend_extension/g' "/usr/local/etc/php/$PHP_VERSION/conf.d/ext-xdebug.ini"
-  Log "xdebug enabled"
-}
-Up::SymfonyXdebugOff() {
-  Log "Up::SymfonyXdebugOff"
-  PHP_VERSION=$(symfony php -r "echo preg_replace('/(\.\d+)$/','', phpversion());")
-  sed -i'.original' -e 's/^zend_extension/;zend_extension/g' "/usr/local/etc/php/$PHP_VERSION/conf.d/ext-xdebug.ini"
-  Log "xdebug disabled"
 }
