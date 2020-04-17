@@ -80,8 +80,6 @@ Compose::InitDockerCompose()
         fi
     fi
 
-    Compose::StartMailhog
-
     Compose::CheckOpenPorts
 
     if [ "$optDelete" = true ]; then
@@ -116,7 +114,6 @@ Compose::CheckOpenPorts()
     export DOCKER_PORT_POSTGRES=$(Compose::RaisePort $DOCKER_PORT_POSTGRES)
     export DOCKER_PORT_REDIS=$(Compose::RaisePort DOCKER_PORT_REDIS)
     export DOCKER_PORT_RABBITMQ=$(Compose::RaisePort DOCKER_PORT_RABBITMQ)
-    export DOCKER_PORT_MAILHOG=$(Compose::RaisePort DOCKER_PORT_MAILHOG)
 
     if [ ! -z "${SYMFONY_PORT:-}" ]; then
        export DOCKER_PORT_MYSQL=306${PROJECT_PORT_SUFFIX}
@@ -131,7 +128,6 @@ Compose::CheckOpenPorts()
     Log "${0} : DOCKER_PORT_POSTGRES = ${DOCKER_PORT_POSTGRES}"
     Log "${0} : DOCKER_PORT_REDIS = ${DOCKER_PORT_REDIS}"
     Log "${0} : DOCKER_PORT_RABBITMQ = ${DOCKER_PORT_RABBITMQ}"
-    Log "${0} : DOCKER_PORT_MAILHOG = ${DOCKER_PORT_MAILHOG}"
 
 }
 
@@ -269,22 +265,4 @@ Compose::InitExtraDataVolumes()
 init-extra-data-containers()
 {
     Log "No extra data container to create"
-}
-
-#
-# Start mailhog container on jetdocker_default docker network
-#
-Compose::StartMailhog()
-{
-    Log "Compose::StartMailhog"
-    try {
-        docker inspect mailhog | grep Status | grep running > /dev/null 2>&1
-    } catch {
-        try {
-            docker rm -f mailhog > /dev/null 2>&1
-        } catch {
-            Log "no mailhog container"
-        }
-        docker-compose --project-name=jetdocker -f "$JETDOCKER/docker-compose.yml" up -d
-    }
 }
