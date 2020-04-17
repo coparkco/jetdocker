@@ -99,24 +99,6 @@ Jetdocker::Usage()
   echo "Run 'jetdocker COMMAND --help' for more information on a command."
 }
 
-Jetdocker::CheckLastExecutionOlderThanOneDay()
-{
-    flagfile=/tmp/jetdocker${1}
-    if [ ! -f $flagfile ]; then
-        echo 0 > $flagfile
-    fi
-    lastupdate=$(cat $flagfile)
-    now=$(date +%s)
-    oneday=( 24*60*60 )
-    if [ $(( now - oneday)) -gt "$lastupdate" ]; then
-        echo "$now" > "$flagfile"
-        echo "true"
-    else
-        echo "false"
-    fi
-
-}
-
 COMMANDS['update']='Jetdocker::Update' # Function name
 COMMANDS_USAGE['20']="  update                   Update jetdocker to the latest version"
 COMMANDS_STANDALONE['update']='Jetdocker::Update' # Function name
@@ -336,10 +318,6 @@ else
   echo "$(UI.Color.Red)illegal command \"$1\""
   Jetdocker::Usage
   exit 1
-fi
-
-if [ "$(Jetdocker::CheckLastExecutionOlderThanOneDay)" == "true" ]; then
-    Jetdocker::Update
 fi
 
 if [ -n "${COMMANDS_STANDALONE[$command]}" ]; then
