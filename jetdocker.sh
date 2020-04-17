@@ -39,7 +39,6 @@ export DOCKER_PORT_MYSQL=3306
 export DOCKER_PORT_POSTGRES=5432
 export DOCKER_PORT_REDIS=6379
 export DOCKER_PORT_RABBITMQ=5672
-export DOCKER_PORT_MAILHOG=8025
 
 # Defaut timeout for DB restoring waiting
 export DB_RESTORE_TIMEOUT=3m0s
@@ -140,15 +139,6 @@ Jetdocker::CheckProject()
     fi
 
     Log "We're in $optConfigPath directory"
-
-    # Check there's a docker-compose file in current directory
-    if [ ! -f 'docker-compose.yml' ]; then
-        echo ""
-        echo "$(UI.Color.Red)  docker-compose.yml file doesn't exist in $(pwd)!"
-        echo ""
-        exit 1
-    fi
-    Log "docker-compose.yml file exist"
 
     # Check there's a env.sh file in current directory
     if [ ! -f 'env.sh' ]; then
