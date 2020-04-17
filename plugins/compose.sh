@@ -90,14 +90,6 @@ Compose::InitDockerCompose()
 
     # Initialise data containers
     Compose::InitDataVolumes
-
-    # Pull images from docker-compose config every day
-    if [ "$(Jetdocker::CheckLastExecutionOlderThanOneDay  "-${COMPOSE_PROJECT_NAME}")" == "true" ]; then
-        Log "Force optBuild to true because it's the first run of day"
-        optBuild=true
-        Log "docker-compose ${dockerComposeFile} pull --ignore-pull-failures"
-        docker-compose ${dockerComposeFile} pull --ignore-pull-failures
-    fi
     dockerComposeInitialised=true
 
 }
