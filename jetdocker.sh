@@ -110,7 +110,7 @@ Jetdocker::Update()
     echo "$(UI.Color.Green)"
     echo "Upgrading jetdocker"
     echo ""
-    if git pull --rebase --stat origin master
+    if git pull --rebase --stat origin
     then
         echo ""
         echo "Jetdocker upgraded"
