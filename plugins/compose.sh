@@ -142,26 +142,21 @@ Compose::DeleteDataVolumes()
 }
 delete-data-volumes()
 {
-    echo "$(UI.Color.Red)Do you really want to delete your data volumes? (y/n)$(UI.Color.Default)"
-    read -r yes
-    if [[ "$yes" = 'y' || "$yes" = 'yes' ]]; then
+    # remove db container in case he's only stopped
+    try {
+        docker rm -f "${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}" > /dev/null 2>&1
+    } catch {
+        Log "No container ${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE} to delete"
+    }
+    # remove dbdata volume
+    try {
+        docker volume rm "${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data" > /dev/null 2>&1
+        sleep 1 # some time the docker inspect next command don't relalize the volume has been deleted ! wait a moment is better
+        echo "$(UI.Color.Green)${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data volume DELETED ! $(UI.Color.Default)"
+    } catch {
+        Log "No ${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data volume to delete"
+    }
 
-        # remove db container in case he's only stopped
-        try {
-            docker rm -f "${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}" > /dev/null 2>&1
-        } catch {
-            Log "No container ${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE} to delete"
-        }
-        # remove dbdata volume
-        try {
-            docker volume rm "${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data" > /dev/null 2>&1
-            sleep 1 # some time the docker inspect next command don't relalize the volume has been deleted ! wait a moment is better
-            echo "$(UI.Color.Green)${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data volume DELETED ! $(UI.Color.Default)"
-        } catch {
-            Log "No ${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data volume to delete"
-        }
-
-    fi
     Compose::DeleteExtraDataVolumes
 
 }
