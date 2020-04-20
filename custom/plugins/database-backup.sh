@@ -6,9 +6,8 @@ DatabaseBackup::Fetch()
     ${DEBUG} && Log::AddOutput database-backup DEBUG
     Log "DatabaseBackup::Fetch"
 
-    identity_file="../.ssh/preprod_rsa"
-    dir="/var/mysql_backup/cameleon"
-    server="cameleonpreprodcoparkco@185.116.106.24"
     chmod 600 $identity_file
-    scp -i $identity_file $server:$dir/$(ssh -i $identity_file $server "ls -t $dir | head -1") .
+
+#    Fetches last modified file in backup folder
+    scp -i ${DB_BACKUP_SSH_KEY} ${DB_BACKUP_HOST}:${DB_BACKUP_DIR}/$(ssh -i ${DB_BACKUP_SSH_KEY} ${DB_BACKUP_HOST} "ls -t ${DB_BACKUP_DIR} | head -1") .
 }
