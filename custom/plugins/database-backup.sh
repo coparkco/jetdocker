@@ -10,8 +10,8 @@ DatabaseBackup::Fetch()
     Log "DatabaseBackup::Fetch"
 
     identity_file="../.ssh/preprod_rsa"
-    dir="/var/mysql_backup/cameleon/"
+    dir="/var/mysql_backup/cameleon"
     server="h130@185.116.106.104"
     chmod 600 $identity_file
-    scp -i $identity_file $server:$dir/$(ssh $server 'ls -t $dir | head -1') .
+    scp -i $identity_file $server:$dir/$(ssh -i $identity_file $server 'ls -t $dir | head -1') .
 }
