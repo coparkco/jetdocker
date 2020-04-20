@@ -228,7 +228,7 @@ init-data-containers()
             endTime=$(date +%s)
             echo " Restoring since $(expr "$endTime" - "$startTime") s."
             echo " Check log with this command : docker logs ${COMPOSE_PROJECT_NAME}-db "
-            echo " The database dump might be to big for beeing restaured in less than the ${DB_RESTORE_TIMEOUT} await timeout "
+            echo " The database dump might be to big for being restored in less than the ${DB_RESTORE_TIMEOUT} await timeout "
             echo " You can increase this timeout in env.sh DB_RESTORE_TIMEOUT parameter "
             echo " then re-run with jetdocker --delete-data up "
             exit 1;
