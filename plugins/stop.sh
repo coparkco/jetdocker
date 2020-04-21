@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-COMMANDS['up']='Stop::Execute' # Function name
-COMMANDS_USAGE['30']="  stop                       Stops running containers and remove associated networks"
+COMMANDS['stop']='Stop::Execute' # Function name
+COMMANDS_USAGE['30']="  stop                     Stops running containers and remove associated networks"
 Stop::Execute()
 {
     try {
