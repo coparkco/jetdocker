@@ -244,7 +244,7 @@ optHelpJetdocker=false
 optEnvFile=.env
 
 # Analyse des arguments de la ligne de commande grâce à l'utilitaire getopts
-while getopts ":vhDc:-:" opt ; do
+while getopts ":vhDce:-:" opt ; do
    case $opt in
        D ) optDebug=true;;
        c ) optConfigPath=$OPTARG;;
