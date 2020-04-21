@@ -197,7 +197,7 @@ init-data-containers()
         DatabaseBackup::Fetch
 
         # shellcheck disable=SC2086
-        docker-compose ${dockerComposeFile} up -d db
+        docker-compose ${dockerComposeFile} up -d ${JETDOCKER_DB_DEFAULT_SERVICE}
         echo "Restoring Database ......... "
         echo ""
         startTime=$(date +%s)
@@ -214,15 +214,6 @@ init-data-containers()
             await -q -t ${DB_RESTORE_TIMEOUT} mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@localhost:${DOCKER_PORT_MYSQL}/$MYSQL_DATABASE > /dev/null 2>&1
             endTime=$(date +%s)
             echo "$(UI.Color.Green) DATABASE RESTORED in $(expr "$endTime" - "$startTime") s !! $(UI.Color.Default)"
-            try {
-                hasSearchReplace=$(docker-compose config | grep search-replace-db 2> /dev/null | wc -l)
-                Log "hasSearchReplace : ${hasSearchReplace}"
-                if [ "${hasSearchReplace}" -gt 0 ]; then
-                    SearchReplaceDb::Execute
-                fi
-            } catch {
-                Log "No search-replace-db configured in docker-compose.yml"
-            }
         } catch {
             echo "$(UI.Color.Red) DATABASE RESTORATION FAILED "
             endTime=$(date +%s)
