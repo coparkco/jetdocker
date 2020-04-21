@@ -78,6 +78,7 @@ Jetdocker::Usage()
   echo ""
   echo "$(UI.Color.Yellow)Options:$(UI.Color.Default)"
   echo "  -c, --config string      Location of project docker config files (default \"./docker\")"
+  echo "  -e, --env                Path to custom env file"
   echo "  -D, --debug              Enable debug mode"
   echo "  -h, --help               Print help information and quit"
   echo "  -v, --version            Print version information and quit"
