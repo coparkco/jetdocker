@@ -141,27 +141,17 @@ Jetdocker::CheckProject()
     Log "We're in $optConfigPath directory"
 
     # Check there's a env.sh file in current directory
-    if [ ! -f 'env.sh' ]; then
+    if [ ! -f $optEnvFile ]; then
         echo ""
-        echo "$(UI.Color.Red)  env.sh file doesn't exist in $(pwd)!"
+        echo "$(UI.Color.Red)  $optEnvFile file doesn't exist in $(pwd)!"
         echo ""
         exit 1
     fi
-    Log "env.sh file exist"
+    Log "$optEnvFile file exists"
 
     # Source env.sh
     # shellcheck disable=SC1091
-    source "env.sh"
-
-    if Jetdocker::FunctionExists init; then
-       Log "init function exist"
-       init
-    else
-        echo ""
-        echo "$(UI.Color.Red) Function init does not exist in env.sh, it must be implemented ! "
-        echo ""
-        exit 1
-    fi
+    export $(grep -v '^#' $optEnvFile | xargs -d '\n')
 
 }
 
@@ -250,6 +240,7 @@ optDebug=false
 optConfigPath=docker
 optVersion=false
 optHelpJetdocker=false
+optEnvFile=.env
 
 # Analyse des arguments de la ligne de commande grâce à l'utilitaire getopts
 while getopts ":vhDc:-:" opt ; do
@@ -258,11 +249,13 @@ while getopts ":vhDc:-:" opt ; do
        c ) optConfigPath=$OPTARG;;
        v ) optVersion=true;;
        h ) optHelpJetdocker=true;;
+       e ) optEnvFile=$OPTARG;;
        - ) case $OPTARG in
               debug ) optDebug=true;;
               config ) optConfigPathg=$2;shift;;
               help ) optHelpJetdocker=true;;
               version ) optVersion;;
+              env ) optEnvFile=$2;shift;;
               * ) echo "$(UI.Color.Red)illegal option --$OPTARG"
                   Jetdocker::Usage
                   exit 1;;
