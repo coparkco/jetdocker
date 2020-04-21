@@ -54,7 +54,7 @@ Up::Execute()
     Compose::InitDockerCompose
 
    #stop and remove docker containers when stop script
-   trap "Up::Stop" SIGINT SIGTERM
+   trap "Stop::Execute" SIGINT SIGTERM
 
    #trap "try { docker-compose stop;docker-compose rm -f -v } catch { Log 'End' }" SIGINT SIGTERM
    Log "RUN WHEN EXIT : docker-compose stop;docker-compose rm -f -v"
@@ -295,18 +295,6 @@ EOM
          }
     done;
 
-}
-
-Up::Stop()
-{
-    try {
-       docker-compose stop
-       docker-compose rm -f -v
-       docker network disconnect --force ${COMPOSE_PROJECT_NAME}_default nginx-reverse-proxy
-       docker network rm ${COMPOSE_PROJECT_NAME}_default
-    } catch {
-        Log 'End'
-    }
 }
 
 Up::Message()
