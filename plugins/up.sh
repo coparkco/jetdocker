@@ -198,7 +198,7 @@ proxy_connect_timeout       600;
 proxy_send_timeout          600;
 proxy_read_timeout          600;
 send_timeout                600;
-server_names_hash_bucket_size  64;
+server_names_hash_bucket_size  128;
 client_max_body_size        100m;
 server {
     listen 80 default_server;
