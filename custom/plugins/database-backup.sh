@@ -5,7 +5,6 @@ DatabaseBackup::Fetch()
     namespace database-backup
     ${DEBUG} && Log::AddOutput database-backup DEBUG
     Log "DatabaseBackup::Fetch"
-    pwd
 
     chmod 600 ${DB_BACKUP_SSH_KEY}
 
