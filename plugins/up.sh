@@ -71,11 +71,6 @@ Up::Execute()
    #trap "try { docker-compose stop;docker-compose rm -f -v } catch { Log 'End' }" SIGINT SIGTERM
    Log "RUN WHEN EXIT : docker-compose stop;docker-compose rm -f -v"
 
-   # On the first run, or on asked option : build the app
-   if [ "$optBuild" = true ] && [ "$JETDOCKER_INSTALL_BEFORE_STARTUP" = true ] ; then
-      Up::Install
-   fi
-
    # Run Compose::CheckOpenPorts again in case ports have been used during Compose::InitDataVolumes or Up::Install
    Compose::CheckOpenPorts
 
@@ -96,11 +91,6 @@ Up::Execute()
    } catch {
      Log $(cat /tmp/jetdocker-error)
    }
-
-   # On the first run, or on asked option : build the app
-   if [ "$optBuild" = true ] && [ "$JETDOCKER_INSTALL_AFTER_STARTUP" = true ] ; then
-      Up::Install
-   fi
 
    # check if OPEN_URl is set (beware of unbound varaible error, see https://stackoverflow.com/questions/7832080/test-if-a-variable-is-set-in-bash-when-using-set-o-nounset )
    if [ -z "${OPEN_URL:-}" ]; then
@@ -145,31 +135,6 @@ Up::Usage()
   echo ""
   echo "Start docker-compose after initializing context (databases, ports, proxy, etc... )"
   echo ""
-}
-
-#
-# build assets , default is make install
-# TO OVERRIDE in env.sh in case of grunt, multiple builds, composer, etc...
-#
-Up::Install()
-{
-    Log "Up::Install"
-    echo "$(UI.Color.Green)Installation ... $(UI.Color.Default)"
-    cd "${projectPath}" || exit
-    try {
-        make install
-    } catch {
-        Log "make install error"
-        echo ""
-        echo "$(UI.Color.Red)Install error : please fix the build and re-run $(UI.Color.Blue)jetdocker up -b$(UI.Color.Red) (option -b will force to re-build)$(UI.Color.Default)"
-        echo ""
-        exit 1
-    }
-    cd "$optConfigPath" || exit
-    echo "$(UI.Color.Green)END Installation ... $(UI.Color.Default)"
-}
-install() {
-    Up::Install # To avoid BC Break, we keep old function name
 }
 
 #
