@@ -104,7 +104,7 @@ Up::Execute()
 
    # check if OPEN_URl is set (beware of unbound varaible error, see https://stackoverflow.com/questions/7832080/test-if-a-variable-is-set-in-bash-when-using-set-o-nounset )
    if [ -z "${OPEN_URL:-}" ]; then
-     OPEN_URL="https://$SERVER_NAME"
+     OPEN_URL="http://$SERVER_NAME"
    fi
 
    Up::Message
@@ -204,7 +204,6 @@ Up::StartReverseProxy() {
 
     echo "Start Nginx reverse-proxy"
     docker run -d -p 80:80 -p 443:443 --name nginx-reverse-proxy \
-        -v jetdocker-ssl-certificate:/certs  \
         -v /tmp/nginx:/etc/nginx/conf.d \
         -t nginx
     templateDir=/tmp/templates
@@ -214,8 +213,6 @@ Up::StartReverseProxy() {
     fi
     mkdir -p $templateDir
     cat <<- EOM > $templateDir/nginx.tmpl
-ssl_certificate     /certs/jetdocker-ssl-certificate.crt;
-ssl_certificate_key /certs/jetdocker-ssl-certificate.key;
 proxy_connect_timeout       600;
 proxy_send_timeout          600;
 proxy_read_timeout          600;

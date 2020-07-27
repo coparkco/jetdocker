@@ -183,57 +183,6 @@ Jetdocker::FunctionExists()
     return 1
 }
 
-#
-# (Re)generate SSL certificate (in docker volume), if not exist or if force argument passed
-#
-Jetdocker::GenerateSSLCertificate() {
-
-    Log "Jetdocker::GenerateSSLCertificate"
-
-    try {
-        docker volume inspect jetdocker-ssl-certificate | grep "$JETDOCKER_DOMAIN_NAME" > /dev/null 2>&1
-    } catch {
-
-        try {
-            Log "remove volume jetdocker-ssl-certificate"
-            docker volume rm jetdocker-ssl-certificate
-        } catch {
-            Log "No jetdocker-ssl-certificate volume to remove"
-        }
-
-        Jetdocker::GenerateRootCACertificate
-
-        Log "Generate volume jetdocker-ssl-certificate"
-        docker volume create jetdocker-ssl-certificate --label "$JETDOCKER_DOMAIN_NAME"
-        docker pull jetpulp/jetdocker-ssl-certificate:latest
-        docker run --rm -e COMMON_NAME="*.$JETDOCKER_DOMAIN_NAME" -e KEY_NAME=jetdocker-ssl-certificate -v jetdocker-ssl-certificate:/certs -v "$JETDOCKER/cacerts:/cacerts" jetpulp/jetdocker-ssl-certificate
-
-    }
-
-    #recopie les certificats généré dans le dossier courrant du host afin de pouvoir les utiliser dans browser-sync en local
-    Log "local copy SSL certificate"
-    docker run --rm --user "$(id -u):$(id -g)" -v jetdocker-ssl-certificate:/certs -v $(pwd):/certs_host jetpulp/jetdocker-ssl-certificate bash -c "cp -Rf certs/ certs_host/"
-    touch .gitignore
-    grep -q -F certs .gitignore || echo 'certs' >> .gitignore
-}
-
-#
-# (Re)generate RootCA certificate
-#
-# cacerts/jetdockerRootCA.crt has been generated without passphrase  :
-# > ssh-keygen -q -t rsa -f jetdockerRootCA.key -N ''
-# > openssl req -new -x509 -sha256 -days 3650 -key jetdockerRootCA.key -out jetdockerRootCA.crt
-#
-Jetdocker::GenerateRootCACertificate() {
-   Log "Jetdocker::GenerateRootCACertificate"
-
-   Log "cp ${JETDOCKER}/cacerts/jetdockerRootCA.crt ${JETDOCKER}/cacerts/rootCA.crt"
-   cp "${JETDOCKER}/cacerts/jetdockerRootCA.crt" "${JETDOCKER}/cacerts/rootCA.crt"
-   Log "cp ${JETDOCKER}/cacerts/jetdockerRootCA.key ${JETDOCKER}/cacerts/rootCA.key"
-   cp "${JETDOCKER}/cacerts/jetdockerRootCA.key" "${JETDOCKER}/cacerts/rootCA.key"
-
-}
-
 # Load all of the config files in ~/.jetdocker/plugins and in custom/plugins that end in .sh
 pluginsFiles="$(ls $JETDOCKER_CUSTOM/jetdocker.sh 2> /dev/null) $(ls $JETDOCKER_CUSTOM/plugins/*.sh 2> /dev/null) $(ls $JETDOCKER/plugins/*.sh)"
 declare -A loadedPlugins
@@ -319,7 +268,5 @@ Jetdocker::CheckProject
 if [ $? -eq 1 ]; then
    exit 1
 fi
-
-Jetdocker::GenerateSSLCertificate false
 
 "$commandFunction" "$@"

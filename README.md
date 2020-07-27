@@ -7,7 +7,6 @@ Jetdocker
 Some of the features are :
 * can run several docker-compose projects, bind automatically to free ports if some try to bind on the same, using a reverse-http-proxy
 * smooth database restoration, can use Search and Replace DB automatically
-* SSL-TLS auto-signed certificate automatically created and configured, in order to test on https
 * xdebug integration
 * phpmyadmin integration
 
@@ -108,17 +107,6 @@ Here are the different commands
 * update : Update jetdocker to the latest version
 * search-replace-db : Run Search Replace DB in a container
 * phpmyadmin : Start/Restart a PhpMyAdmin container connecting to all running MySQL containers
-
-## SSL/TLS Certificate
-
-On first start of `jetdocker up`, jetdocker will generate a SSL/TLS certificate, signed by the `./cacerts/jetdockerRootCA.crt` Root CA certificate, for all the `$JETDOCKER_DOMAIN_NAME` subdomains (default is *.localhost.tv).
-This certificate is stored in a docker volume named `jetdocker-ssl-certificate`, and this volume is mounted in the nginx-proxy container, and used by nginx.
-
-In order to avoid the browser alert due to an unknown CA, you should import the `./cacerts/jetdockerRootCA.crt` in your browsers as a new CA :
-* Firefox : https://wiki.wmtransfer.com/projects/webmoney/wiki/Installing_root_certificate_in_Mozilla_Firefox
-* Chrome : https://wiki.wmtransfer.com/projects/webmoney/wiki/Installing_root_certificate_in_Google_Chrome
-
-If you change your `$JETDOCKER_DOMAIN_NAME`, you will have to delete your `jetdocker-ssl-certificate` volume to force jetdocker to recreate it : `docker volume rm jetdocker-ssl-certificate`.
 
 ## Getting Updates
 
