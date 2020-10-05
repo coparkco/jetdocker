@@ -6,8 +6,6 @@ COMMANDS_USAGE['00']="  up                       Start docker-compose after init
 optDelete=false
 optBuild=false
 optSilent=false
-optOpen=false
-optXdebug=false
 optHelp=false
 
 
@@ -25,15 +23,11 @@ Up::Execute()
            d ) optDelete=true;;
            b ) optBuild=true;;
            s ) optSilent=true;;
-           o ) optOpen=true;;
-           x ) optXdebug=true;;
            h ) optHelp=true;;
            - ) case $OPTARG in
                   delete-data ) optDelete=true;;
-                  xdebug ) optXdebug=true;;
                   build ) optBuild=true;;
                   silent ) optSilent=true;;
-                  open ) optOpen=true;;
                   help ) Up::Usage
                          exit 0;;
                   * ) echo "illegal option --$OPTARG"
@@ -50,8 +44,6 @@ Up::Execute()
     Log "optDelete = ${optDelete}"
     Log "optBuild = ${optBuild}"
     Log "optSilent = ${optSilent}"
-    Log "optOpen = ${optOpen}"
-    Log "optXdebug = ${optXdebug}"
     Log "optHelp = ${optHelp}"
 
     ${optHelp} && {
@@ -59,14 +51,10 @@ Up::Execute()
       exit 0
     }
 
-    if [ "$optXdebug" = true ]; then
-        export XDEBUG_ENABLED=true
-    fi
-
     Compose::InitDockerCompose
 
    #stop and remove docker containers when stop script
-   trap "Up::Stop" SIGINT SIGTERM
+   trap "Stop::Execute" SIGINT SIGTERM
 
    #trap "try { docker-compose stop;docker-compose rm -f -v } catch { Log 'End' }" SIGINT SIGTERM
    Log "RUN WHEN EXIT : docker-compose stop;docker-compose rm -f -v"
@@ -99,14 +87,6 @@ Up::Execute()
 
    Up::Message
 
-   if [ "$optOpen" = true ]; then
-        if [ "$OSTYPE" != 'linux-gnu' ]; then
-            open "$OPEN_URL"
-        else
-            xdg-open "$OPEN_URL"
-        fi
-    fi
-
     if [ "$optSilent" = false ]; then
         # log in standard output
         try {
@@ -128,9 +108,7 @@ Up::Usage()
   echo "$(UI.Color.Yellow)Options:$(UI.Color.Default)"
   echo "  -d, --delete-data        Delete data docker volumes before start, forcing it to restore"
   echo "  -b, --build              Force building (assets, etc...) before start"
-  echo "  -x, --xdebug             Enable xdebug in PHP container"
   echo "  -s, --silent             Don't run docker-compose log --follow after start"
-  echo "  -o, --open               Open browser after start on the $SERVER_NAME url"
   echo "  -h, --help               Print help information and quit"
   echo ""
   echo "Start docker-compose after initializing context (databases, ports, proxy, etc... )"
@@ -182,7 +160,7 @@ proxy_connect_timeout       600;
 proxy_send_timeout          600;
 proxy_read_timeout          600;
 send_timeout                600;
-server_names_hash_bucket_size  64;
+server_names_hash_bucket_size  128;
 client_max_body_size        100m;
 server {
     listen 80 default_server;
@@ -279,18 +257,6 @@ EOM
          }
     done;
 
-}
-
-Up::Stop()
-{
-    try {
-       docker-compose stop
-       docker-compose rm -f -v
-       docker network disconnect --force ${COMPOSE_PROJECT_NAME}_default nginx-reverse-proxy
-       docker network rm ${COMPOSE_PROJECT_NAME}_default
-    } catch {
-        Log 'End'
-    }
 }
 
 Up::Message()

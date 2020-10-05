@@ -142,26 +142,21 @@ Compose::DeleteDataVolumes()
 }
 delete-data-volumes()
 {
-    echo "$(UI.Color.Red)Do you really want to delete your data volumes? (y/n)$(UI.Color.Default)"
-    read -r yes
-    if [[ "$yes" = 'y' || "$yes" = 'yes' ]]; then
+    # remove db container in case he's only stopped
+    try {
+        docker rm -f "${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}" > /dev/null 2>&1
+    } catch {
+        Log "No container ${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE} to delete"
+    }
+    # remove dbdata volume
+    try {
+        docker volume rm "${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data" > /dev/null 2>&1
+        sleep 1 # some time the docker inspect next command don't relalize the volume has been deleted ! wait a moment is better
+        echo "$(UI.Color.Green)${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data volume DELETED ! $(UI.Color.Default)"
+    } catch {
+        Log "No ${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data volume to delete"
+    }
 
-        # remove db container in case he's only stopped
-        try {
-            docker rm -f "${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}" > /dev/null 2>&1
-        } catch {
-            Log "No container ${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE} to delete"
-        }
-        # remove dbdata volume
-        try {
-            docker volume rm "${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data" > /dev/null 2>&1
-            sleep 1 # some time the docker inspect next command don't relalize the volume has been deleted ! wait a moment is better
-            echo "$(UI.Color.Green)${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data volume DELETED ! $(UI.Color.Default)"
-        } catch {
-            Log "No ${COMPOSE_PROJECT_NAME}-${JETDOCKER_DB_DEFAULT_SERVICE}data volume to delete"
-        }
-
-    fi
     Compose::DeleteExtraDataVolumes
 
 }
@@ -202,7 +197,7 @@ init-data-containers()
         DatabaseBackup::Fetch
 
         # shellcheck disable=SC2086
-        docker-compose ${dockerComposeFile} up -d db
+        docker-compose ${dockerComposeFile} up -d ${JETDOCKER_DB_DEFAULT_SERVICE}
         echo "Restoring Database ......... "
         echo ""
         startTime=$(date +%s)
@@ -219,21 +214,12 @@ init-data-containers()
             await -q -t ${DB_RESTORE_TIMEOUT} mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@localhost:${DOCKER_PORT_MYSQL}/$MYSQL_DATABASE > /dev/null 2>&1
             endTime=$(date +%s)
             echo "$(UI.Color.Green) DATABASE RESTORED in $(expr "$endTime" - "$startTime") s !! $(UI.Color.Default)"
-            try {
-                hasSearchReplace=$(docker-compose config | grep search-replace-db 2> /dev/null | wc -l)
-                Log "hasSearchReplace : ${hasSearchReplace}"
-                if [ "${hasSearchReplace}" -gt 0 ]; then
-                    SearchReplaceDb::Execute
-                fi
-            } catch {
-                Log "No search-replace-db configured in docker-compose.yml"
-            }
         } catch {
             echo "$(UI.Color.Red) DATABASE RESTORATION FAILED "
             endTime=$(date +%s)
             echo " Restoring since $(expr "$endTime" - "$startTime") s."
             echo " Check log with this command : docker logs ${COMPOSE_PROJECT_NAME}-db "
-            echo " The database dump might be to big for beeing restaured in less than the ${DB_RESTORE_TIMEOUT} await timeout "
+            echo " The database dump might be to big for being restored in less than the ${DB_RESTORE_TIMEOUT} await timeout "
             echo " You can increase this timeout in env.sh DB_RESTORE_TIMEOUT parameter "
             echo " then re-run with jetdocker --delete-data up "
             exit 1;
