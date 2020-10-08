@@ -35,7 +35,7 @@ import util/log util/exception util/tryCatch util/namedParameters util/class uti
 # Default ports for docker containers
 export DOCKER_PORT_HTTP=81
 export DOCKER_PORT_HTTPS=444
-export DOCKER_PORT_MYSQL=3306
+export DOCKER_PORT_MYSQL=33060
 export DOCKER_PORT_POSTGRES=5432
 export DOCKER_PORT_REDIS=6379
 export DOCKER_PORT_RABBITMQ=5672
