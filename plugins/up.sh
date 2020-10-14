@@ -164,6 +164,7 @@ server_names_hash_bucket_size  128;
 client_max_body_size        100m;
 server {
     listen 80 default_server;
+    listen 443 ssl default_server;
     server_name _; # This is just an invalid value which will never trigger on a real hostname.
     error_log /proc/self/fd/2 debug;
     access_log /proc/self/fd/1;
@@ -210,6 +211,7 @@ upstream {{ \$host }}-ssl {
 }
 server {
     gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+    listen 443;
     server_name {{ \$host }};
     proxy_buffering off;
     error_log /proc/self/fd/2 debug;
