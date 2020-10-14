@@ -203,6 +203,31 @@ server {
     }
 }
     {{ end }}
+    {{ if eq \$address.Port "443" "8443" }}
+upstream {{ \$host }}-ssl {
+        # {{\$value.Name}}
+        server {{ \$network.IP }}:{{ \$address.Port }};
+}
+server {
+    gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+    server_name {{ \$host }};
+    proxy_buffering off;
+    error_log /proc/self/fd/2 debug;
+    access_log /proc/self/fd/1;
+
+    location / {
+        proxy_pass https://{{ trim \$host }}-ssl;
+        proxy_set_header Host \$http_host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+        # HTTP 1.1 support
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+    }
+}
+    {{ end }}
     {{ end }}
 {{ end }}
 {{ end }}
