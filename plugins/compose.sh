@@ -104,9 +104,9 @@ Compose::CheckOpenPorts()
     export DOCKER_PORT_HTTPS=$(Compose::RaisePort $DOCKER_PORT_HTTPS)
     export DOCKER_PORT_MYSQL=$(Compose::RaisePort $DOCKER_PORT_MYSQL)
     export DOCKER_PORT_POSTGRES=$(Compose::RaisePort $DOCKER_PORT_POSTGRES)
-    export DOCKER_PORT_REDIS=$(Compose::RaisePort DOCKER_PORT_REDIS)
-    export DOCKER_PORT_RABBITMQ=$(Compose::RaisePort DOCKER_PORT_RABBITMQ)
-    export DOCKER_PORT_MAILCATCHER=$(Compose::RaisePort DOCKER_PORT_MAILCATCHER)
+    export DOCKER_PORT_REDIS=$(Compose::RaisePort $DOCKER_PORT_REDIS)
+    export DOCKER_PORT_RABBITMQ=$(Compose::RaisePort $DOCKER_PORT_RABBITMQ)
+    export DOCKER_PORT_MAILCATCHER=$(Compose::RaisePort $DOCKER_PORT_MAILCATCHER)
 
     Log "${0} : DOCKER_PORT_HTTP = ${DOCKER_PORT_HTTP}"
     Log "${0} : DOCKER_PORT_HTTPS = ${DOCKER_PORT_HTTPS}"
